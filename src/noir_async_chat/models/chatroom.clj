@@ -4,45 +4,65 @@
   (:use lamina.core
         noir-async.utils))
 
-(def handles (ref #{}))
+; ----------------------------------------------------------------------------------------
+; chatroom
 
-(defn has-user? [handle]
-  (dosync
-    (get (ensure handles) handle)))
+(defprotocol IChatroom
+  ""
+  (has-user? [this handle])
+  (add-user [this handle])
+  (remove-user [this handle])
+  (current-users [this])
+  (user-count [this])
+  (broadcast-handles [this])
+  (send-chat [this handle message])
+  (subscribe-channel [this ch])
+  (print-all [this]))
 
-(defn add-user [handle]
-  (dosync
-      (if (has-user? handle)
-        false
-        (alter handles conj handle))))
- 
-(defn remove-user [handle]
-  (dosync
-    (alter handles disj handle)))
+(deftype chatroom [name handles chat-channel]
+  IChatroom
 
-(defn current-users []
-  @handles)
+  (has-user? [this handle]
+    (dosync
+      (get (ensure handles) handle)))
 
-(defn user-count []
-  (count @handles))
+  (add-user [this handle]
+    (dosync
+        (if (has-user? this handle)
+          false
+          (alter handles conj handle))))
+   
+  (remove-user [this handle]
+    (dosync
+      (alter handles disj handle)))
 
-(def chat-channel (permanent-channel))
+  (current-users [this]
+    @handles)
 
-(receive-all chat-channel #(println (str "CH> " %1)))
+  (user-count [this]
+    (count @handles))
 
-(defn broadcast-handles []
-  (enqueue chat-channel
-    (json/generate-string
-      {:mtype "all-handles"
-       :data (vec @handles)})))
+  (broadcast-handles [this]
+    (enqueue chat-channel
+      (json/generate-string
+        {:mtype "all-handles"
+         :data (vec @handles)})))
 
-(set-interval 1000 broadcast-handles)
+  (send-chat [this handle message]
+    (enqueue chat-channel
+      (json/generate-string
+        {:mtype "chat"
+         :data  {:handle handle :text message}})))
 
-(defn send-chat [handle message]
-  (enqueue chat-channel
-    (json/generate-string
-      {:mtype "chat"
-       :data  {:handle handle :text message}})))
+  (subscribe-channel [this ch]
+    (siphon chat-channel ch))
 
-(defn subscribe-channel [ch]
-  (siphon chat-channel ch))
+  (print-all [this] 
+    (receive-all chat-channel #(println (str "CH> " %1)))))
+
+(defn make-chatroom [name]
+  (->chatroom name (ref #{}) (permanent-channel)))
+
+; ----------------------------------------------------------------------------------------
+
+; (receive-all chat-channel #(println (str "CH> " %1)))

@@ -4,9 +4,14 @@
             [cheshire.core :as json])
   (:use noir-async.core))
 
+(def chatroom (room/make-chatroom "the room"))
+
+(noir-async.utils/set-interval 1000 (fn [] (room/broadcast-handles chatroom)))
+(room/print-all chatroom)
+
 (defn msg-set-handle [conn handle]
   (cond
-    (room/add-user handle)
+    (room/add-user chatroom handle)
       (async-push conn
         (json/generate-string {:mtype "handle-set-succ" :data handle}))
     :else
@@ -14,7 +19,7 @@
         (json/generate-string {:mtype "handle-set-fail" :data handle}))))
    
 (defn msg-chat [handle text]
-  (room/send-chat handle text))
+  (room/send-chat chatroom handle text))
 
 (def ^:dynamic *conn-sess* nil)
 
@@ -31,13 +36,13 @@
         (println (str "Unrecognized command: " msg-raw)))))
 
 (defpage-async "/room" {} conn
-  (room/subscribe-channel (:request-channel conn))
+  (room/subscribe-channel chatroom (:request-channel conn))
   (let [conn-sess (atom {})]
     (on-close conn (fn []
-      (room/remove-user (:handle @conn-sess))
+      (room/remove-user chatroom (:handle @conn-sess))
       (println (str "Conn closed"))))
     (on-receive conn
       (fn [msg]
         (println "Recvd" msg)
         (dispatch-message conn-sess conn msg)
-            (async-push conn msg)))))
+        (async-push conn msg)))))
