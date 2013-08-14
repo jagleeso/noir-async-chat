@@ -6,8 +6,8 @@
 
 (def chatroom (room/make-chatroom "the room"))
 
-(noir-async.utils/set-interval 1000 (fn [] (room/broadcast-handles chatroom)))
-(room/print-all chatroom)
+; (noir-async.utils/set-interval 1000 (fn [] (room/broadcast-handles chatroom)))
+; (room/print-all chatroom)
 
 (defn msg-set-handle [conn handle]
   (cond
