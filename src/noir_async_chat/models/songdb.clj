@@ -1,7 +1,8 @@
 ; parse an mp3 file and return tags (:artist :title)
 (ns noir-async-chat.models.songdb
-    (:require [ clojure.java.shell :as shell ]
-              [ claudio.id3 ]))
+    (:require [clojure.java.shell :as shell]
+              [claudio.id3]
+              [clojure.java.io :as io]))
 
 (defn tags [file]
     (claudio.id3/read-tag file))
@@ -23,14 +24,14 @@
 
 (defn all-tags 
   "Returns a lazy seq of :artist, :album, and :title tags for all mp3 files found by 
-  recursively searching through directory (a File)"
+  recursively searching through directory."
   [directory]
   (map 
     (fn [mp3-file]
       (sub-map (tags mp3-file) [:artist, :album, :title]))
     (filter 
       #(.matches (.getName %) ".*.mp3$") 
-      (file-seq directory))))
+      (file-seq (clojure.java.io/file directory)))))
 
 ; (clojure.pprint/pprint (all-tags (clojure.java.io/file "/home/james/Music/AFI/Decemberunderground")))
-(class (all-tags (clojure.java.io/file "/home/james/Music/AFI/Decemberunderground")))
+; (clojure.pprint/pprint (all-tags "/home/james/Music/AFI/Decemberunderground"))

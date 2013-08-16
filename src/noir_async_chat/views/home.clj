@@ -22,6 +22,8 @@
             (label "message-text" "Text: ")
             (text-field "message-text" "")
             (submit-button "Send"))
+          (form-to  {:id "get-songdb-form"} [:post "/songdb"]
+            (submit-button "Get SongDB"))
         ]
         [:h2 "People in room: "]
         [:div {:id "chatroom-handles"}]

@@ -4,16 +4,18 @@
             [cheshire.core :as json])
   (:use noir-async.core))
 
-(def chatroom (room/make-chatroom "the room"))
+(def chatroom (room/make-chatroom "the room" (clojure.java.io/file "/home/james/Music/AFI/Decemberunderground")))
 
-; (noir-async.utils/set-interval 1000 (fn [] (room/broadcast-handles chatroom)))
-; (room/print-all chatroom)
+(noir-async.utils/set-interval 1000 (fn [] (room/broadcast-handles chatroom)))
+(room/print-all chatroom)
 
 (defn msg-set-handle [conn handle]
   (cond
     (room/add-user chatroom handle)
-      (async-push conn
-        (json/generate-string {:mtype "handle-set-succ" :data handle}))
+      (do 
+        (room/subscribe-priv-channel chatroom handle (:request-channel conn))
+        (async-push conn
+                    (json/generate-string {:mtype "handle-set-succ" :data handle})))
     :else
       (async-push conn
         (json/generate-string {:mtype "handle-set-fail" :data handle}))))
@@ -32,6 +34,8 @@
           (swap! conn-sess assoc :handle data))
       (= mtype "chat")
         (msg-chat (@conn-sess :handle) data)
+      (= mtype "get-songdb")
+        (room/send-songdb chatroom (@conn-sess :handle))
       :else
         (println (str "Unrecognized command: " msg-raw)))))
 

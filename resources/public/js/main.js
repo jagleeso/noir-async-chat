@@ -7,7 +7,7 @@ window.log = function(){
 };
 
 $(function() {
-  var sock = window.roomSocket = new WebSocket("ws://localhost:3000/room");
+  var sock = window.roomSocket = new WebSocket("ws://localhost:8080/room");
 
   function createMessage (mtype, data) {
     return JSON.stringify({mtype: mtype, data: data}); 
@@ -76,6 +76,12 @@ $(function() {
     hideError();
     var handle = $('#handle').val();
     sendMessage("set-handle", handle);
+  });
+
+  $('#get-songdb-form').submit(function (e) {
+    e.preventDefault();
+    hideError();
+    sendMessage("get-songdb", null);
   });
   
   var textEl = $('#message-text');

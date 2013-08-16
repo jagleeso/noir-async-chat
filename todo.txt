@@ -1,0 +1,48 @@
+- goals:
+  1. make something using Clojure and ClojureScript, to get familiar with the workflow
+  2. perform a concurrent operation on the server using Clojure's STM
+- secondary goals:
+  a. use websockets
+
+- prereqs:
+  - install ClojureScript
+  - figure out how to share a view between server and client
+  - use it to:
+    - render a view serverside and send the rendered view to the client
+    - render a view clientside (either by asynchronously sending data or by injecting JSON into the 
+      page beforehand)
+
+- ideas:
+- make a chat server 
+  - keeps track of the entire conversation, so that when new users join, they have the entire 
+    conversation (2.)
+  - broadcasts messages to all clients
+  - can send private messages
+  - uses web sockets serverside
+
+- stream a song from the server
+  - stream songs to individual clients, implementing the js code in cljs
+  - synchronize the streaming with the other clients (a.)
+  - upload songs to the server
+  - update clients' view of songs available on the server; possible implementation:
+    - clients poll for changes every X seconds
+    - client an message on the websocket telling them to update; client  updates asynchronously
+      - pros:
+    - client receives update on the websocket
+      - cons:
+        - will this block the chat server for sufficiently large updates?
+      - pros:
+        - not a separate request
+
+- modify existing chat to use ClojureScript instead of javascript
+  - client
+    - is there an API for interacting with WebSocket's?
+- add multiple chatrooms
+  - server
+    - make the equivalent of a class in clojure that encapsulates the shared data of a chatroom
+
+
+1. have the server send a list of mp3 tags 
+2. populate a local database in js from 1.
+3. query the database for a artist / song
+4. stream a song across the websocket
