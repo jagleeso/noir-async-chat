@@ -7,7 +7,7 @@
 (def chatroom (room/make-chatroom "the room" (clojure.java.io/file "/home/james/Music/AFI/Decemberunderground")))
 
 (noir-async.utils/set-interval 1000 (fn [] (room/broadcast-handles chatroom)))
-(room/print-all chatroom)
+; (room/print-all chatroom)
 
 (defn msg-set-handle [conn handle]
   (cond

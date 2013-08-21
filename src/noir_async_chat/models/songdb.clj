@@ -2,23 +2,31 @@
 (ns noir-async-chat.models.songdb
     (:require [clojure.java.shell :as shell]
               [claudio.id3]
-              [clojure.java.io :as io]))
+              [clojure.java.io :as io]
+              [clojure.test :refer [deftest is testing]]))
 
 (defn tags [file]
-    (claudio.id3/read-tag file))
+    (claudio.id3/read-tag (clojure.java.io/file file)))
 
 ; (tags "/home/james/Music/Wolfmother/Wolfmother/Woman.mp3")
 
-(defn shell-tags [filepath]
-    (shell/sh "id3v2" "--list" filepath))
-
 (defn sub-map 
   "Return a map with key-value pairs from map where key is in keys."
-  [map keys]
+  [a-map the-keys]
   (reduce 
-    (fn [m key] (conj m [key (key map)])) 
+    (fn [m key] (conj m [key (key a-map)])) 
     {}
-    keys))
+    the-keys))
+
+(deftest sub-map-tests
+  (testing "trivial"
+    (are [expect got] (= expect got)
+         {} (sub-map {} []) 
+         {} (sub-map {} [:one]) 
+         {} (sub-map {:one 1} [])))
+  (are [expect got] (= expect got)
+       {} (sub-map {} []) 
+       {:one 1} (sub-map {:one 1 :two 2})))
 
 ; (sub-map (tags "/home/james/Music/Wolfmother/Wolfmother/Woman.mp3") [:artist, :album])
 
