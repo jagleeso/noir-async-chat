@@ -8,3 +8,5 @@ pom.xml
 *.swn
 *.swo
 .lein-failures
+.lein-repl-history
+/target
