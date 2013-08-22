@@ -3,7 +3,7 @@
     (:require [clojure.java.shell :as shell]
               [claudio.id3]
               [clojure.java.io :as io]
-              [clojure.test :refer [deftest is testing]]))
+              [clojure.test :refer [deftest is testing are]]))
 
 (defn tags [file]
     (claudio.id3/read-tag (clojure.java.io/file file)))
